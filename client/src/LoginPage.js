@@ -21,6 +21,22 @@ const LoginPage = () => {
         password: false
     });
 
+    // Reset form state
+    const resetForm = () => {
+        setFormData({
+            username: '',
+            password: ''
+        });
+        setErrors({
+            username: '',
+            password: ''
+        });
+        setTouched({
+            username: false,
+            password: false
+        });
+    };
+
     // Validation rules
     const validateField = (name, value) => {
         switch (name) {
@@ -51,6 +67,16 @@ const LoginPage = () => {
             default:
                 return '';
         }
+    };
+
+    // Validate all fields at once
+    const validateAllFields = () => {
+        const newErrors = {
+            username: validateField('username', formData.username),
+            password: validateField('password', formData.password)
+        };
+        setErrors(newErrors);
+        return !newErrors.username && !newErrors.password;
     };
 
     // Handle input changes with validation
@@ -94,28 +120,43 @@ const LoginPage = () => {
                formData.username.trim() && formData.password;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate all fields on submit
-        const newErrors = {
-            username: validateField('username', formData.username),
-            password: validateField('password', formData.password)
-        };
-        
-        setErrors(newErrors);
+        // Mark all fields as touched and validate
         setTouched({ username: true, password: true });
-
-        // Only submit if no errors
-        if (!newErrors.username && !newErrors.password) {
+        
+        // Validate all fields - this is necessary to show errors for untouched fields
+        const isValid = validateAllFields();
+        
+        if (isValid) {
             console.log('Form submitted:', formData);
-            // Here you would typically make an API call
+            
+            try {
+                // Simulate API call
+                // const response = await loginAPI(formData);
+                
+                // Reset form after successful submission
+                resetForm();
+                console.log('Form reset after successful submission');
+                
+                // Here you would typically:
+                // - Redirect user
+                // - Show success message
+                // - Update app state
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                // Don't reset form on error - let user see their input
+            }
         } else {
             console.log('Form has validation errors');
         }
     };
 
     const pagechange = () => {
+        // Reset form when switching pages
+        resetForm();
         setIsRegister(!isRegister);
     };
 
@@ -159,8 +200,8 @@ const LoginPage = () => {
                         onChange={handleInputChange}
                         onBlur={handleBlur}
                         margin="normal"
-                        error={!!errors.username}
-                        helperText={errors.username}
+                        error={touched.username && !!errors.username}
+                        helperText={touched.username ? errors.username : ''}
                         required
                     />
                     
@@ -174,8 +215,8 @@ const LoginPage = () => {
                         onChange={handleInputChange}
                         onBlur={handleBlur}
                         margin="normal"
-                        error={!!errors.password}
-                        helperText={errors.password}
+                        error={touched.password && !!errors.password}
+                        helperText={touched.password ? errors.password : ''}
                         required
                     />
                     

@@ -1,93 +1,180 @@
-import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Row from 'react-bootstrap/Row';
+import React, { useState } from 'react';
+import TextField from '@mui/material/TextField';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 
-function RegisterPage() {
-  const [validated, setValidated] = useState(false);
-
-  const handleSubmit = (event) => {
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    setValidated(true);
-  };
-
-  return (
-    <Form noValidate validated={validated} onSubmit={handleSubmit}>
-      <Row className="mb-3">
-        <Form.Group as={Col} md="4" controlId="validationCustom01">
-          <Form.Label>First name</Form.Label>
-          <Form.Control
-            required
-            type="text"
-            placeholder="First name"
-          />
-          <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-          <Form.Control.Feedback type="invalid">Name Required</Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group as={Col} md="4" controlId="validationCustom02">
-          <Form.Label>Last name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Last name"
-          />
-        </Form.Group>
-        <Form.Group as={Col} md="4" controlId="validationCustomUsername">
-          <Form.Label>Username</Form.Label>
-          <InputGroup hasValidation>
-            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Username"
-              aria-describedby="inputGroupPrepend"
-              required
+const RegisterPage = () => {
+    const [formData, setFormData] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
+    const [errors, setErrors] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
+    const [touched, setTouched] = useState({
+        firstname: false,
+        lastname: false,
+        email: false,
+        password: false,
+        confirmPassword: false
+    });
+    const [isFormValid, setIsFormValid] = useState(false);
+    const handleBlur = (e) => {
+        const { name } = e.target;
+        setTouched(prev => ({ ...prev, [name]: true }));
+    };
+    const validateField = (name, value) => {
+        switch (name) {
+            case 'firstname':
+                return value.trim() ? '' : 'First name is required';
+            case 'lastname':
+                return value.trim() ? '' : 'Last name is required';
+            case 'email':
+                return value.trim() ? '' : 'Email is required';
+            case 'password':
+                return value.trim() ? '' : 'Password is required';
+            case 'confirmPassword':
+                return value.trim() ? '' : 'Confirm password is required';
+            default:
+                return '';
+        }
+    };
+    const validateAllFields = () => {
+        const newErrors = {
+            firstname: validateField('firstname', formData.firstname),
+            lastname: validateField('lastname', formData.lastname),
+            email: validateField('email', formData.email),
+            password: validateField('password', formData.password),
+            confirmPassword: validateField('confirmPassword', formData.confirmPassword)
+        };
+        setErrors(newErrors);
+        setTouched(prev => ({ ...prev, firstname: true, lastname: true, email: true, password: true, confirmPassword: true }));
+        return !newErrors.firstname && !newErrors.lastname && !newErrors.email && !newErrors.password && !newErrors.confirmPassword;
+    };
+    const handleSubmit = (e) => { 
+        e.preventDefault();
+        const isValid = validateAllFields();
+        setIsFormValid(isValid);
+        if (isValid) {
+            console.log(formData);
+        } else {
+            console.log('Form is invalid');
+        }
+    };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    return(
+        <Container
+        sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '80vh'
+        }}>
+        <Box
+        sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            maxWidth: '400px',
+            width: '100%',
+            bgcolor: '#E5E3E3',
+            borderRadius: 2,
+            p: 4,
+            boxShadow: 3
+        }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+            Register
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+            <TextField
+                fullWidth
+                name="firstname"
+                label="First Name"
+                variant="outlined"
+                value={formData.firstname}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                error={touched.firstname && !!errors.firstname}
+                helperText={touched.firstname ? errors.firstname : ''}
+                margin="normal"
+                required
+            /> 
+            <TextField
+                fullWidth
+                name="lastname"
+                label="Last Name"
+                variant="outlined"
+                value={formData.lastname}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                error={touched.lastname && !!errors.lastname}
+                helperText={touched.lastname ? errors.lastname : ''}
+                margin="normal"
+                required
             />
-            <Form.Control.Feedback type="invalid">
-              Please choose a username.
-            </Form.Control.Feedback>
-          </InputGroup>
-        </Form.Group>
-      </Row>
-      <Row className="mb-3">
-        <Form.Group as={Col} md="6" controlId="validationCustom03">
-          <Form.Label>City</Form.Label>
-          <Form.Control type="text" placeholder="City" required />
-          <Form.Control.Feedback type="invalid">
-            Please provide a valid city.
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group as={Col} md="3" controlId="validationCustom04">
-          <Form.Label>State</Form.Label>
-          <Form.Control type="text" placeholder="State" required />
-          <Form.Control.Feedback type="invalid">
-            Please provide a valid state.
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group as={Col} md="3" controlId="validationCustom05">
-          <Form.Label>Zip</Form.Label>
-          <Form.Control type="text" placeholder="Zip" required />
-          <Form.Control.Feedback type="invalid">
-            Please provide a valid zip.
-          </Form.Control.Feedback>
-        </Form.Group>
-      </Row>
-      <Form.Group className="mb-3">
-        <Form.Check
-          required
-          label="Agree to terms and conditions"
-          feedback="You must agree before submitting."
-          feedbackType="invalid"
-        />
-      </Form.Group>
-      <Button type="submit">Submit form</Button>
-    </Form>
-  );
-}
+            <TextField
+                fullWidth
+                name="email"
+                label="Email"
+                variant="outlined"
+                value={formData.email}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                error={touched.email && !!errors.email}
+                helperText={touched.email ? errors.email : ''}
+                margin="normal"
+                required
+            />
+            <TextField
+                fullWidth
+                name="password"
+                label="Password"
+                variant="outlined"
+                value={formData.password}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                margin="normal"
+                error={touched.password && !!errors.password}
+                helperText={touched.password ? errors.password : ''}
+                required
+            />
+            <TextField
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                variant="outlined"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                margin="normal"
+                error={touched.confirmPassword && !!errors.confirmPassword}
+                helperText={touched.confirmPassword ? errors.confirmPassword : ''}
+                required
+            />
+            <Button
+                type="submit"
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={!isFormValid}
+            >
+                Register
+            </Button>
+            </Box>
+        </Box>
+        </Container>
+    );
+};
 
 export default RegisterPage;
